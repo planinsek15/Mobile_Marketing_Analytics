@@ -22,7 +22,7 @@ export PATH="$HOME/.local/bin:$PATH"
 export MMP_SERVER="${MMP_SERVER:-localhost,1433}"
 export MMP_DATABASE="${MMP_DATABASE:-MMP}"
 export MMP_UID="${MMP_UID:-sa}"
-export MMP_PWD="${MMP_PWD:-PimSql2024!}"
+export MMP_PWD="${MMP_PWD:-XoXo!}"
 export MMP_DRIVER="${MMP_DRIVER:-ODBC Driver 18 for SQL Server}"
 
 echo "[env] ODBC: $(python3 -c 'import pyodbc; print(pyodbc.drivers())' 2>/dev/null)"

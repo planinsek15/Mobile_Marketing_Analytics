@@ -96,3 +96,12 @@ models:
         tests:
           - not_null
           - relationships: {to: ref('dim_channel'), field: channel_key}
+
+  - name: mart_privacy_roas_gap
+    description: "Privacy-aware: MMP vs backend vs SKAN; ROAS gap + crowd anonymity flag."
+    columns:
+      - name: campaign_key
+        tests: [not_null, unique]
+      - name: has_crowd_anonymity
+        tests:
+          - accepted_values: {values: [0, 1]}

@@ -28,9 +28,9 @@ Backend events  ─┘        │                    │                       �
 ### Medallion arhitektura
 | Plast | Shema | Vsebina |
 |-------|-------|---------|
-| 🥉 Bronze | `raw` | Surovi podatki iz 4 virov, idempotentno naloženi |
-| 🥈 Silver | `staging` | Očiščeni, deduplicirani, reconciliation |
-| 🥇 Gold | `marts` | Dimenzijski model, metrike rasti |
+| 🥉 Bronze | `raw` | Surovi podatki iz 4 virov, idempotentno naloženi (`_loaded_at`) |
+| 🥈 Silver | `staging` | Očiščeni, standardizirani, **deduplicirani** (backend) |
+| 🥇 Gold | `marts` | Reconciliation, dimenzijski model, metrike rasti, privacy plast |
 
 ---
 
@@ -67,53 +67,80 @@ Mobile_Marketing_Analytics/
 ## 🚀 Zagon
 
 ### Predpogoji
-- Python 3.10+
-- SQL Server 2019 (dostopen)
+- Python 3.10+ (razvito in testirano na **Python 3.14**)
+- SQL Server 2019 — Docker container `pim-sqlserver`, baza **MMP**
 - ODBC Driver 18 for SQL Server
+
+> **Opomba o okolju:** to okolje teče na Python 3.14 brez root pravic. Pinani stari
+> paketi nimajo wheel-ov za 3.14, zato `requirements.txt` uporablja ohlapne verzije
+> (dejanske zaklenjene so v `requirements.lock.txt`). unixODBC + ODBC Driver 18 sta
+> razpakirana lokalno v `~/.local/odbc` (brez sudo); aktivira ju `source env.sh`.
 
 ### Namestitev
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt --break-system-packages
+source env.sh        # aktivira lokalni ODBC + nastavi MMP_* spremenljivke
 ```
 
-### Pipeline
+### Pipeline (od začetka do konca)
 ```bash
-# 1. Generiraj vire
-python 01_sources/gen_appsflyer.py
-python 01_sources/gen_singular.py
-python 01_sources/gen_skan.py
-python 01_sources/gen_backend.py
+# 0. Baza + sheme (enkratno)
+docker exec pim-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa \
+  -P 'PimSql2024!' -C -Q "IF DB_ID('MMP') IS NULL CREATE DATABASE MMP"
 
-# 2. Naloži v raw
+# 1. Generiraj vse 4 vire (fiksni seed → ponovljivo)
+python 01_sources/generate_all.py
+
+# 2. Naloži v raw (idempotentno)
 python 02_ingestion/load_to_raw.py
 
-# 3. Transformiraj
-cd 03_dbt && dbt run && dbt test
+# 3. Transformiraj + testi kakovosti
+cd 03_dbt && export DBT_PROFILES_DIR="$PWD"
+dbt run && dbt test && dbt source freshness
 
 # 4. Dashboard (opcijsko)
-streamlit run 04_dashboard/streamlit_app.py
+cd .. && streamlit run 04_dashboard/streamlit_app.py
 ```
 
 ---
 
-## 📊 Ključne metrike
+## 📊 Rezultati (zadnji zagon)
 
-- **CPI** — Cost Per Install
-- **CAC** — Cost per paying user
-- **ROAS** — Return on Ad Spend (D7, D30)
-- **LTV** — Lifetime Value (napoved iz kohort)
-- **Retention** — D1 / D7 / D30
-- **ROAS gap** — razlika MMP vs backend (privacy-aware)
+| Plast | Rezultat |
+|-------|----------|
+| **Viri** | AppsFlyer 5.340 · Singular 1.154 · SKAN 1.355 · Backend 2.084 vrstic |
+| **dbt** | 18 modelov, **60 testov PASS** / 1 WARN (po dizajnu) / 0 ERROR, freshness 4 PASS |
+| **Reconciliation** | 206 / 249 kanal×dan vrstic z neskladjem > 5 % |
+| **Revenue gap** | MMP precenjuje prihodek za **~10–14 %** glede na backend (vir resnice) |
+| **Attribution gap** | 189 backend dogodkov (7.266 €) brez MMP atribucije |
+| **Crowd anonymity** | 4 kampanje s 100 % NULL `conversion_value` (SKAN privacy) |
+
+### Ključne metrike (po kanalu)
+| Kanal | Poraba | CPI | CAC | ROAS D30 |
+|-------|-------:|----:|----:|---------:|
+| Google Ads | 64.285 € | 74,92 € | 221,67 € | 0,25 |
+| Meta | 59.165 € | 61,50 € | 176,61 € | 0,31 |
+| TikTok | 26.560 € | 57,74 € | 146,74 € | 0,34 |
+| Apple Search Ads | 16.876 € | 50,68 € | 141,82 € | 0,39 |
+| organic | 0 € | — | — | — |
+
+> Metrike: **CPI** (cost/install), **CAC** (cost/paying user), **ROAS** D7/D30,
+> **LTV** (napoved iz kohort), **Retention** D1/D7/D30, **ROAS gap** (MMP vs backend).
 
 ---
 
-## 🔍 Diferenciator: Reconciliation
+## 🔍 Diferenciator: Reconciliation & Privacy
 
-Jedro projekta je **data quality plast** ki primerja:
-- MMP (AppsFlyer) prihodek vs backend prihodek
-- Označi neskladja nad pragom (5%)
-- Obravnava pozne in podvojene dogodke
-- SKAN agregati modelirani ločeno (brez user-level joina)
+Jedro projekta je **data quality + reconciliation plast** (`03_dbt/models/reconciliation/`
+in `mart_privacy_roas_gap`):
+- MMP (AppsFlyer) prihodek **vs** backend prihodek po kanalu × dan, z delta % in zastavico (>5 %)
+- Deduplikacija backend dogodkov (`ROW_NUMBER`) + obravnava poznih dogodkov (`is_late_event`)
+- Attribution gap: backend dogodki brez MMP atribucije (napihnejo ROAS, če jih ignoriramo)
+- SKAN agregati modelirani **ločeno** (brez user-level joina); crowd-anonymity (NULL cv) eksplicitno označen
+- Tri-perspektivni ROAS: MMP vs backend vs SKAN drug ob drugem
+
+Glej tudi `00_docs/Astra_izboljsave.md` (event taxonomy · SKAN cv shema · reconciliation · alerting)
+in `00_docs/PROJEKT_POROCILO.md` (opis vseh faz).
 
 ---
 

@@ -1,21 +1,24 @@
 # Mobile Marketing Analytics Pipeline — Python knjižnice
+# OPOMBA: okolje teče na Python 3.14, zato so verzije ohlapne (>=),
+# saj pinani stari paketi (numpy 2.1, pandas 2.2, dbt 1.8) nimajo wheel-ov za 3.14.
+# Dejansko nameščene/testirane verzije so v requirements.lock.txt.
 
 # Simulacija podatkov
-faker==30.3.0
-pandas==2.2.3
-numpy==2.1.2
+faker>=30
+pandas>=2.2
+numpy>=2.1
 
 # SQL Server povezava
-pyodbc==5.2.0
-sqlalchemy==2.0.36
+pyodbc>=5.1
+sqlalchemy>=2.0
 
 # dbt za SQL Server
-dbt-core==1.8.7
-dbt-sqlserver==1.8.4
+dbt-core>=1.8
+dbt-sqlserver>=1.8
 
 # Dashboard (opcijsko)
-streamlit==1.39.0
-plotly==5.24.1
+streamlit>=1.39
+plotly>=5.24
 
 # Pomožno
-python-dotenv==1.0.1
+python-dotenv>=1.0

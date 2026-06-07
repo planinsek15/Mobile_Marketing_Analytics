@@ -1,8 +1,8 @@
 # 🤖 CLAUDE CODE — MASTER NALOGA: Mobile Marketing Analytics Pipeline
 
 ## DOVOLJENJA
-Polna avtonomija za: branje/pisanje datotek, bash ukaze, SQL na MMA bazi, pip install, git commit + push.
-NE delaj na PIM_test bazi — samo MMA!
+Polna avtonomija za: branje/pisanje datotek, bash ukaze, SQL na MMP bazi, pip install, git commit + push.
+NE delaj na PIM_test bazi — samo MMP!
 
 ## PRED ZAČETKOM — PREBERI
 1. `00_docs/Projektna_naloga.md` — celotna naloga
@@ -17,14 +17,14 @@ Zgradi celoten pipeline: 4 simulirani viri → SQL Server raw → dbt staging/re
 ## FAZA 0 — Priprava okolja
 
 ```bash
-# Ustvari MMA bazo
+# Ustvari MMP bazo
 docker exec -it pim-sqlserver /opt/mssql-tools18/bin/sqlcmd \
   -S localhost -U sa -P 'PimSql2024!' -C \
-  -Q "IF DB_ID('MMA') IS NULL CREATE DATABASE MMA"
+  -Q "IF DB_ID('MMP') IS NULL CREATE DATABASE MMP"
 
 # Ustvari sheme
 docker exec -it pim-sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P 'PimSql2024!' -C -d MMA \
+  -S localhost -U sa -P 'PimSql2024!' -C -d MMP \
   -Q "IF SCHEMA_ID('raw') IS NULL EXEC('CREATE SCHEMA raw'); IF SCHEMA_ID('staging') IS NULL EXEC('CREATE SCHEMA staging'); IF SCHEMA_ID('marts') IS NULL EXEC('CREATE SCHEMA marts')"
 
 # Namesti Python knjižnice
@@ -41,7 +41,7 @@ curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /et
 sudo apt update && sudo ACCEPT_EULA=Y apt install -y msodbcsql18
 ```
 
-Git commit: "Faza 0: priprava okolja, MMA baza, sheme"
+Git commit: "Faza 0: priprava okolja, MMP baza, sheme"
 
 ---
 
@@ -82,7 +82,7 @@ Git commit: "Faza 1: simulacija 4 virov"
 
 Ustvari `02_ingestion/load_to_raw.py`:
 - Preberi vse 4 CSV iz data/
-- Ustvari raw tabele v MMA (raw.appsflyer, raw.singular, raw.skan, raw.backend)
+- Ustvari raw tabele v MMP (raw.appsflyer, raw.singular, raw.skan, raw.backend)
 - Naloži idempotentno: dodaj stolpec _loaded_at, in TRUNCATE+INSERT ali MERGE (ne podvoji ob ponovnem zagonu)
 - Particioniraj logično po datumu
 - Uporabi pyodbc ali sqlalchemy
@@ -110,7 +110,7 @@ mma_dbt:
       type: sqlserver
       driver: 'ODBC Driver 18 for SQL Server'
       server: localhost,1433
-      database: MMA
+      database: MMP
       schema: staging
       user: sa
       password: PimSql2024!
@@ -198,7 +198,7 @@ Git commit: "Faza 6: privacy-aware plast + Astra dokument"
 ## FAZA 7 (opcijsko) — Dashboard
 
 Ustvari `04_dashboard/streamlit_app.py`:
-- Poveži na MMA marts shemo
+- Poveži na MMP marts shemo
 - 3 vizualizacije: najboljši kanali po ROAS, MMP vs backend razhajanje, SKAN vs deterministična pokritost
 
 Git commit: "Faza 7: Streamlit dashboard"

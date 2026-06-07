@@ -1,0 +1,16 @@
+# Zaklenjene verzije (Python 3.14, dejansko nameščene in testirane)
+agate==1.9.1
+dbt-adapters==1.24.2
+dbt-common==1.38.0
+dbt-core==1.11.11
+dbt-sqlserver==1.9.2
+Faker==39.0.0
+mashumaro==3.22
+numpy==2.4.6
+pandas==3.0.3
+plotly==6.8.0
+pyodbc==5.3.0
+python-dotenv==1.2.2
+pytz==2026.2
+SQLAlchemy==2.0.50
+streamlit==1.58.0

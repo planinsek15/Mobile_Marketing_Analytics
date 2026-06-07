@@ -1,0 +1,87 @@
+version: 2
+
+models:
+  - name: stg_appsflyer
+    description: "Očiščeni AppsFlyer installi (en na napravo), standardiziran kanal."
+    columns:
+      - name: appsflyer_id
+        description: "Identifikator naprave — primarni ključ installov."
+        tests:
+          - not_null
+          - unique
+      - name: channel
+        description: "Standardiziran kanal (media_source)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Meta', 'Google Ads', 'TikTok', 'Apple Search Ads', 'organic']
+      - name: platform
+        tests:
+          - accepted_values:
+              values: ['ios', 'android']
+      - name: is_paid
+        tests:
+          - accepted_values:
+              values: [0, 1]
+
+  - name: stg_appsflyer_events
+    description: "AppsFlyer in-app revenue dogodki (af_purchase / af_subscribe)."
+    columns:
+      - name: appsflyer_id
+        description: "FK na stg_appsflyer — vsak dogodek mora imeti install."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_appsflyer')
+              field: appsflyer_id
+      - name: event_name
+        tests:
+          - accepted_values:
+              values: ['af_purchase', 'af_subscribe']
+      - name: event_revenue
+        tests:
+          - not_null
+
+  - name: stg_singular
+    description: "Dnevni agregat porabe (network-reported)."
+    columns:
+      - name: spend_date
+        tests:
+          - not_null
+      - name: channel
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Meta', 'Google Ads', 'TikTok', 'Apple Search Ads', 'organic']
+
+  - name: stg_skan
+    description: "SKAN postbacki; conversion_value sme biti NULL (crowd anonymity)."
+    columns:
+      - name: postback_sequence_index
+        tests:
+          - accepted_values:
+              values: [0, 1, 2]
+      - name: cv_band
+        tests:
+          - accepted_values:
+              values: ['unknown', 'none', 'low', 'medium', 'high']
+
+  - name: stg_backend
+    description: "Deduplicirani backend dogodki z atribucijo in late flagom."
+    columns:
+      - name: user_id
+        tests:
+          - not_null
+      - name: event
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['purchase', 'subscribe']
+      - name: is_attributed
+        tests:
+          - accepted_values:
+              values: [0, 1]
+      - name: is_late_event
+        tests:
+          - accepted_values:
+              values: [0, 1]

@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: rec_revenue_discrepancy
+    description: >
+      Dnevni prihodek MMP (AppsFlyer) vs backend po kanalu z razliko (% in absolutno).
+      is_discrepancy_flag = 1 označuje vrstice z odstopanjem nad 5 %.
+    columns:
+      - name: channel
+        tests:
+          - not_null
+      - name: activity_date
+        tests:
+          - not_null
+      - name: is_discrepancy_flag
+        tests:
+          - accepted_values:
+              values: [0, 1]
+
+  - name: rec_attribution_gap
+    description: >
+      Backend dogodki brez AppsFlyer atribucije (neatribuiran prihodek po dnevu in tipu).
+    columns:
+      - name: event_date
+        tests:
+          - not_null
+      - name: unattributed_events
+        tests:
+          - not_null

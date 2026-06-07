@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Bronze plast — surovi podatki iz 4 virov, naloženi prek 02_ingestion."
+    database: MMP
+    schema: raw
+    # Freshness: opozori, če podatki niso bili osveženi v 2 dneh, napaka po 7 dneh.
+    freshness:
+      warn_after: {count: 2, period: day}
+      error_after: {count: 7, period: day}
+    tables:
+      - name: appsflyer
+        description: "AppsFlyer raw: install + in-app revenue dogodki (device-level)."
+        loaded_at_field: _loaded_at
+        columns:
+          - name: appsflyer_id
+            description: "Identifikator naprave (join ključ proti backend.user_id)."
+      - name: singular
+        description: "Singular dnevni agregat porabe po kanal×kampanja×država."
+        loaded_at_field: _loaded_at
+      - name: skan
+        description: "SKAdNetwork agregirani postbacki (iOS, brez user ID-ja)."
+        loaded_at_field: _loaded_at
+      - name: backend
+        description: "Backend in-app dogodki — vir resnice z namernimi neskladji."
+        loaded_at_field: _loaded_at

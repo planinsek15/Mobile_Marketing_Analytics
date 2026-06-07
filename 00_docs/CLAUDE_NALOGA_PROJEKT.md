@@ -19,12 +19,12 @@ Zgradi celoten pipeline: 4 simulirani viri → SQL Server raw → dbt staging/re
 ```bash
 # Ustvari MMP bazo
 docker exec -it pim-sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P 'PimSql2024!' -C \
+  -S localhost -U sa -P 'XoXo!' -C \
   -Q "IF DB_ID('MMP') IS NULL CREATE DATABASE MMP"
 
 # Ustvari sheme
 docker exec -it pim-sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P 'PimSql2024!' -C -d MMP \
+  -S localhost -U sa -P 'XoXo!' -C -d MMP \
   -Q "IF SCHEMA_ID('raw') IS NULL EXEC('CREATE SCHEMA raw'); IF SCHEMA_ID('staging') IS NULL EXEC('CREATE SCHEMA staging'); IF SCHEMA_ID('marts') IS NULL EXEC('CREATE SCHEMA marts')"
 
 # Namesti Python knjižnice
@@ -113,7 +113,7 @@ mma_dbt:
       database: MMP
       schema: staging
       user: sa
-      password: PimSql2024!
+      password:  XoXo!
       encrypt: true
       trust_cert: true
 ```

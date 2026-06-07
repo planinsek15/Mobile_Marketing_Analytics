@@ -1,0 +1,33 @@
+# Podatki
+data/*.csv
+data/*.duckdb
+data/*.parquet
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# dbt
+03_dbt/target/
+03_dbt/dbt_packages/
+03_dbt/logs/
+.user.yml
+
+# Okolje in skrivnosti
+.env
+profiles.yml
+*.secret
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

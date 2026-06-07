@@ -1,0 +1,21 @@
+# Mobile Marketing Analytics Pipeline — Python knjižnice
+
+# Simulacija podatkov
+faker==30.3.0
+pandas==2.2.3
+numpy==2.1.2
+
+# SQL Server povezava
+pyodbc==5.2.0
+sqlalchemy==2.0.36
+
+# dbt za SQL Server
+dbt-core==1.8.7
+dbt-sqlserver==1.8.4
+
+# Dashboard (opcijsko)
+streamlit==1.39.0
+plotly==5.24.1
+
+# Pomožno
+python-dotenv==1.0.1

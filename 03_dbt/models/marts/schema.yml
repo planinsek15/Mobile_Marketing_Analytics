@@ -1,0 +1,88 @@
+version: 2
+
+models:
+  # ── Dimenzije ──────────────────────────────────────────────────────────
+  - name: dim_date
+    description: "Koledarska dimenzija (dnevno zrno)."
+    columns:
+      - name: date_day
+        tests: [not_null, unique]
+
+  - name: dim_channel
+    description: "Marketinški kanali."
+    columns:
+      - name: channel_key
+        tests: [not_null, unique]
+      - name: is_paid
+        tests:
+          - accepted_values: {values: [0, 1]}
+
+  - name: dim_campaign
+    description: "Kampanje (kanal × kampanja)."
+    columns:
+      - name: campaign_key
+        tests: [not_null, unique]
+
+  - name: dim_geo
+    description: "Geografije (države)."
+    columns:
+      - name: country_code
+        tests: [not_null, unique]
+
+  # ── Dejstva (relationships → dimenzije) ────────────────────────────────
+  - name: fct_installs
+    description: "Installi (zrno: naprava)."
+    columns:
+      - name: channel_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_channel'), field: channel_key}
+      - name: campaign_key
+        tests:
+          - relationships: {to: ref('dim_campaign'), field: campaign_key}
+      - name: country_code
+        tests:
+          - relationships: {to: ref('dim_geo'), field: country_code}
+      - name: install_date
+        tests:
+          - relationships: {to: ref('dim_date'), field: date_day}
+
+  - name: fct_events
+    description: "Prihodkovni dogodki (zrno: dogodek)."
+    columns:
+      - name: channel_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_channel'), field: channel_key}
+      - name: campaign_key
+        tests:
+          - relationships: {to: ref('dim_campaign'), field: campaign_key}
+      - name: event_date
+        tests:
+          - relationships: {to: ref('dim_date'), field: date_day}
+
+  - name: fct_spend
+    description: "Poraba (zrno: dan × kanal × kampanja × država)."
+    columns:
+      - name: channel_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_channel'), field: channel_key}
+      - name: campaign_key
+        tests:
+          - relationships: {to: ref('dim_campaign'), field: campaign_key}
+
+  # ── Marts ──────────────────────────────────────────────────────────────
+  - name: mart_marketing_unified
+    description: "Poenoten pogled: poraba + installi + prihodek po channel×campaign×geo×date."
+    columns:
+      - name: activity_date
+        tests: [not_null]
+
+  - name: mart_retention
+    description: "D1/D7/D30 retention po akvizicijskih kohortah."
+    columns:
+      - name: cohort_size
+        tests: [not_null]
+      - name: retention_d1_pct
+        description: "Mora biti >= D7 >= D30 (monotonost preverjena s custom testom)."

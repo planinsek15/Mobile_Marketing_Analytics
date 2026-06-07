@@ -5,6 +5,7 @@ select
     af.appsflyer_id,
     af.channel                          as channel_key,
     concat(af.channel, '|', af.campaign) as campaign_key,
+    af.campaign,
     af.country_code,
     af.install_date,
     af.platform,

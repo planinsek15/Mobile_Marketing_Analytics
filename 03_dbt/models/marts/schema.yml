@@ -86,3 +86,13 @@ models:
         tests: [not_null]
       - name: retention_d1_pct
         description: "Mora biti >= D7 >= D30 (monotonost preverjena s custom testom)."
+
+  - name: mart_growth_metrics
+    description: "CPI, CAC, ROAS D7/D30, LTV po kanalu×kampanji; blended vs SKAN-only."
+    columns:
+      - name: campaign_key
+        tests: [not_null, unique]
+      - name: channel_key
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_channel'), field: channel_key}

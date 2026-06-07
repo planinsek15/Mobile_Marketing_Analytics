@@ -86,7 +86,7 @@ source env.sh        # aktivira lokalni ODBC + nastavi MMP_* spremenljivke
 ```bash
 # 0. Baza + sheme (enkratno)
 docker exec pim-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa \
-  -P 'PimSql2024!' -C -Q "IF DB_ID('MMP') IS NULL CREATE DATABASE MMP"
+  -P 'XoXo!' -C -Q "IF DB_ID('MMP') IS NULL CREATE DATABASE MMP"
 
 # 1. Generiraj vse 4 vire (fiksni seed → ponovljivo)
 python 01_sources/generate_all.py

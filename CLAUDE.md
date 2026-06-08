@@ -15,20 +15,20 @@ Polna navodila: `00_docs/Projektna_naloga.md` — VEDNO preberi najprej.
 ## SQL SERVER POVEZAVA
 - Strežnik: localhost,1433 (Docker)
 - Login: sa
-- Geslo: PimSql2024!
+- Geslo: XoXo!
 - Baza za projekt: MMP (ustvari novo, NE PIM_test!)
 
 ### Ustvari bazo MMP na začetku:
 ```
 docker exec -it pim-sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P 'PimSql2024!' -C \
+  -S localhost -U sa -P 'XoXo!' -C \
   -Q "IF DB_ID('MMP') IS NULL CREATE DATABASE MMP"
 ```
 
 ### Test ukaz:
 ```
 docker exec -it pim-sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P 'PimSql2024!' -C -d MMP
+  -S localhost -U sa -P 'XoXo!' -C -d MMP
 ```
 
 ## SQL SERVER 2019 PRAVILA
